@@ -30,7 +30,7 @@
 
   var list = new Backbone.List({
     itemType: ListItem,
-    collection: new Backbone.Has.Collection(models, {
+    collection: new Backbone.Collection(models, {
       comparator: function(model) { return model.get('text'); }
     })
   });

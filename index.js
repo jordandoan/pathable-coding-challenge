@@ -1,21 +1,18 @@
-(function($, undefined) {
+jQuery(function($) {
 
   var ListItem = Backbone.View.extend({
 
     events: {
-      'click button.remove': '_remove'
+      'click button.remove': function() {
+        this.model.destroy();
+      }
     },
 
     render: function() {
-      $(this.el).html(
-        this.model.get('text') +
-        '&nbsp;<button class="remove">Remove</button>'
+      this.$el.html(
+        '<button class="remove">Remove</button> ' + this.model.escape('text')
       );
       return this;
-    },
-
-    _remove: function() {
-      list.collection.remove(this.model);
     }
 
   });
@@ -28,24 +25,38 @@
     {text: 'boom!'},
   ];
 
-  var list = new Backbone.List({
-    itemType: ListItem,
+  var App = Backbone.View.extend({
+
+    events: {
+
+      'click .reset': function() {
+        this.collection.reset(models);
+      },
+
+      'submit form': function(e) {
+        var $input = $('input', e.target);
+        this.collection.add({text: $input.val()});
+        $input.val('');
+        return false;
+      }
+
+    },
+
+    render: function() {
+      new List({
+        view: ListItem,
+        collection: this.collection
+      }).render().$el.appendTo(this.el);
+      return this;
+    }
+
+  });
+
+  var app = window.app = new App({
+    el: 'body',
     collection: new Backbone.Collection(models, {
-      comparator: function(model) { return model.get('text'); }
+      comparator: 'text'
     })
-  });
+  }).render();
 
-  $(function() {
-    list.render();
-    $('body').append(list.el);
-    $('form.add').on('submit', function(e) {
-      list.collection.add({text: $('input.add').val()});
-      $('input.add').val('');
-      return false;
-    });
-    $('.reset').on('click', function() {
-      list.collection.reset(models);
-    });
-  });
-
-})(jQuery);
+});
